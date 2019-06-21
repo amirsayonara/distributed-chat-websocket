@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div id="server"></div>
+    <div>
+        <form id="form">
+            <textarea disabled name="log" id="log" cols="30" rows="10"></textarea><br>
+            <input type="text" id="pesan"> <input type="submit">
+        </form>
+    </div>
+    <script>
+        function conn() {
+            var server = -1;
+            w = new WebSocket('ws://'+location.host);
+            w.onmessage=function(e) {
+                console.log(e.data);
+                if (server==-1) {
+                    server = JSON.parse(e.data).from;
+                    document.getElementById('server').innerHTML="Terhubung ke server: "+server;
+                } else {
+                    document.getElementById('log').value+=e.data+"\n=======================\n";
+                    document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+                }
+            }
+            w.onclose=function(e) {
+                document.getElementById('server').innerHTML="Terpurus, menghubungkan ulang . .";
+                conn();
+            }
+            document.getElementById('form').onsubmit=function(){
+                w.send(document.getElementById('pesan').value);
+                document.getElementById('log').value+=document.getElementById('pesan').value+"\n=======================\n";
+                document.getElementById('pesan').value='';
+                return false;
+            }
+        }
+        conn();
+    </script>
+</body>
+</html>
